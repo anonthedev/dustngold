@@ -1,15 +1,17 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
+import SessionProvider from "@/components/SessionProvider";
+import QueryProvider from "@/components/QueryProvider";
+import { Toaster } from "@/components/ui/sonner";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { AppSidebar } from "@/components/app-sidebar";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -23,12 +25,23 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        {children}
-      </body>
-    </html>
+    <SessionProvider>
+      <QueryProvider>
+        <SidebarProvider>
+          <html lang="en">
+            <body
+              className={`${inter.variable} antialiased flex`}
+            >
+              <AppSidebar />
+              <main className="flex-1">
+                <SidebarTrigger />
+                {children}
+              </main>
+              <Toaster />
+            </body>
+          </html>
+        </SidebarProvider>
+      </QueryProvider>
+    </SessionProvider>
   );
 }
