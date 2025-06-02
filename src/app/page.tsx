@@ -145,7 +145,7 @@ export default function ArtsPage() {
         <div className="text-center py-12">
           <p className="text-xl text-gray-500">No arts found</p>
           <Link href="/arts/add" className="mt-4 inline-block">
-            <Button>Add New Art</Button>
+            <Button className="cursor-pointer">Add New Art</Button>
           </Link>
         </div>
       ) : (

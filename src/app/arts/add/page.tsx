@@ -868,7 +868,7 @@ export default function AddArtPage() {
             <Button
               type="submit"
               disabled={addArtMutation.isPending || !session}
-              className="w-full"
+              className="w-full cursor-pointer"
             >
               {addArtMutation.isPending ? 'Adding...' : 'Add Art'}
             </Button>
