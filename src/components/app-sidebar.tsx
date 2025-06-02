@@ -32,8 +32,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useRouter } from "next/navigation";    
 
 export function AppSidebar() {
+  const router = useRouter();
   const pathname = usePathname();
   const { selectedType, setSelectedType } = useArtsStore();
   const { data: session, status } = useSession();
@@ -128,7 +130,7 @@ export function AppSidebar() {
               </DropdownMenuContent>
             </DropdownMenu>
         ) : (
-          <Button onClick={() => signIn()} variant="outline" className="w-full">
+          <Button onClick={()=>{router.push("/login")}} variant="outline" className="w-full">
             <LogIn className="mr-2 h-4 w-4" />
             <span>Log in</span>
           </Button>
