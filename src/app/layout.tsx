@@ -4,8 +4,7 @@ import "./globals.css";
 import SessionProvider from "@/components/SessionProvider";
 import QueryProvider from "@/components/QueryProvider";
 import { Toaster } from "@/components/ui/sonner";
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/app-sidebar";
+import { SidebarProvider } from "@/components/ui/sidebar";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -28,13 +27,11 @@ export default function RootLayout({
     <SessionProvider>
       <QueryProvider>
         <SidebarProvider>
-          <html lang="en">
+          <html lang="en" className="h-full">
             <body
-              className={`${inter.variable} antialiased flex`}
+              className={`${inter.variable} antialiased flex bg-gradient-to-br from-slate-950 via-indigo-950 to-purple-950 text-white min-h-screen h-full bg-fixed`}
             >
-              <AppSidebar />
-              <main className="flex-1">
-                <SidebarTrigger />
+              <main className="flex-1 w-full">
                 {children}
               </main>
               <Toaster />
