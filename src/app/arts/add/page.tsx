@@ -28,6 +28,26 @@ function formatDateForInput(date: Date | null): string {
   return `${year}-${month}-${day}`;
 }
 
+// Function to extract YouTube video ID from various YouTube URL formats
+const extractYoutubeVideoId = (url: string): string | null => {
+  // Regular expressions for different YouTube URL formats
+  const regexPatterns = [
+    /(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\s]+)/, // Standard and shortened URLs
+    /youtube\.com\/embed\/([^?\s]+)/, // Embed URLs
+    /youtube\.com\/v\/([^?\s]+)/, // Old embed URLs
+    /music\.youtube\.com\/watch\?v=([^&\s]+)/ // YouTube Music URLs
+  ];
+
+  for (const pattern of regexPatterns) {
+    const match = url.match(pattern);
+    if (match && match[1]) {
+      return match[1];
+    }
+  }
+  
+  return null;
+};
+
 export default function AddArtPage() {
   const { data: session } = useSession();
   const router = useRouter();
@@ -54,6 +74,7 @@ export default function AddArtPage() {
   const [isSearchingMusic, setIsSearchingMusic] = useState(false);
   const [selectedMusic, setSelectedMusic] = useState<any>(null);
   
+  const [isLoadingYoutubeData, setIsLoadingYoutubeData] = useState(false);
   const [publishedDateStr, setPublishedDateStr] = useState('');
   const movieSearchResultsRef = useRef<HTMLDivElement>(null);
   const bookSearchResultsRef = useRef<HTMLDivElement>(null);
@@ -454,6 +475,93 @@ export default function AddArtPage() {
     }
   };
 
+  // Function to fetch YouTube video data
+  const fetchYoutubeVideoData = async (videoId: string) => {
+    try {
+      setIsLoadingYoutubeData(true);
+      
+      // Use YouTube Data API via a proxy endpoint to avoid exposing API key
+      const response = await fetch(`/api/youtube?videoId=${videoId}`);
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch video data');
+      }
+      
+      const data = await response.json();
+      
+      if (data && data.items && data.items.length > 0) {
+        const videoData = data.items[0];
+        const snippet = videoData.snippet;
+        
+        // Set form values with YouTube data
+        const videoTitle = snippet.title;
+        setValue('name', videoTitle);
+        setValue('description', snippet.description || '');
+        setValue('image_url', snippet.thumbnails.high?.url || snippet.thumbnails.default?.url || '');
+        
+        // Also update the search field based on current art type
+        // This is necessary because the form uses hidden inputs for name in some art types
+        const currentType = watch('type');
+        if (currentType === 'movie') {
+          setMovieSearch(videoTitle);
+        } else if (currentType === 'book') {
+          setBookSearch(videoTitle);
+        } else if (currentType === 'music') {
+          setMusicSearch(videoTitle);
+        }
+        
+        // Set the channel name as the artist
+        const channelName = snippet.channelTitle;
+        if (channelName) {
+          setArtists(new Set([channelName]));
+          setValue('artist', [channelName]);
+        }
+        
+        // Set published date
+        if (snippet.publishedAt) {
+          const publishedDate = new Date(snippet.publishedAt);
+          setValue('published_on', publishedDate);
+          setPublishedDateStr(formatDateForInput(publishedDate));
+        }
+        
+        // Set tags if available
+        if (snippet.tags && snippet.tags.length > 0) {
+          const videoTags = snippet.tags.slice(0, 5);
+          setTags(new Set(videoTags));
+        }
+        
+        toast.success('YouTube video details loaded successfully!');
+      } else {
+        toast.error('No video data found');
+      }
+    } catch (error) {
+      console.error('Error fetching YouTube data:', error);
+      toast.error('Failed to load YouTube video details');
+    } finally {
+      setIsLoadingYoutubeData(false);
+    }
+  };
+  
+  // Handle URL input change to detect YouTube links
+  const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const url = e.target.value;
+    setValue('url', url);
+    
+    // Check if it's a YouTube or YouTube Music URL
+    if (url.includes('youtube.com') || url.includes('youtu.be') || url.includes('music.youtube.com')) {
+      const videoId = extractYoutubeVideoId(url);
+      
+      if (videoId) {
+        // If we're on the music tab, set the art type to music
+        if (url.includes('music.youtube.com')) {
+          setValue('type', 'music');
+        }
+        
+        fetchYoutubeVideoData(videoId);
+      }
+    }
+  };
+
   const onSubmit = (data: any) => {
     if (!session || !session.user?.id) {
       toast.error('You must be logged in to add art');
@@ -711,11 +819,19 @@ export default function AddArtPage() {
             <label htmlFor="url" className="block text-sm font-medium mb-2">
               URL
             </label>
-            <Input
-              id="url"
-              placeholder="Enter URL"
-              {...register('url')}
-            />
+            <div className="relative">
+              <Input
+                id="url"
+                placeholder="Enter URL (YouTube links will auto-fill details)"
+                {...register('url')}
+                onChange={handleUrlChange}
+              />
+              {isLoadingYoutubeData && (
+                <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                  <div className="animate-spin h-4 w-4 border-2 border-slate-500 rounded-full border-t-transparent"></div>
+                </div>
+              )}
+            </div>
             {errors.url && (
               <p className="text-red-500 text-sm mt-1">{errors.url.message}</p>
             )}
