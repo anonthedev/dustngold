@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, use } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
 import { useArtsStore } from "@/lib/store";
@@ -16,9 +16,9 @@ import { User } from "@/types";
 export default function UserArtsPage({
   params,
 }: {
-  params: { username: string };
+  params: Promise<{ username: string }>;
 }) {
-  const { username } = params;
+  const { username } = use(params);
   const router = useRouter();
   const { data: session } = useSession();
   const [arts, setArts] = useState<Art[]>([]);
@@ -30,11 +30,18 @@ export default function UserArtsPage({
   const [userUpvotes, setUserUpvotes] = useState<string[]>([]);
   const { upvoteArt: upvoteArtInStore } = useArtsStore();
 
+  // This page should only handle actual usernames, not system routes
   useEffect(() => {
-    if ((session?.user as User)?.username && username === (session?.user as User)?.username) {
+    
+    // If it's the current user's profile, redirect to /profile
+    if (
+      (session?.user as User)?.username &&
+      username === (session?.user as User)?.username
+    ) {
       router.replace("/profile");
+      return;
     }
-  }, [username, session]);
+  }, [username, session, router]);
 
   // Upvote mutation
   const upvoteMutation = useMutation({
@@ -90,7 +97,9 @@ export default function UserArtsPage({
   useEffect(() => {
     async function fetchUserArts() {
       try {
-        const res = await fetch(`/api/arts?username=${encodeURIComponent(username)}`);
+        const res = await fetch(
+          `/api/arts?username=${encodeURIComponent(username)}`
+        );
 
         if (!res.ok) {
           throw new Error("Failed to fetch user's arts");

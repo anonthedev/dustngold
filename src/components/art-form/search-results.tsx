@@ -95,7 +95,7 @@ export function SearchResults({ type, setValue }: SearchResultsProps) {
       {searchResults.length > 0 ? (
         <div 
           ref={resultRef}
-          className="absolute z-10 mt-1 w-full bg-white dark:bg-slate-800 rounded-md shadow-lg max-h-60 overflow-auto border border-slate-200 dark:border-slate-700"
+          className="absolute z-10 mt-1 w-full bg-white text-black dark:bg-slate-800 dark:text-white rounded-md shadow-lg max-h-60 overflow-auto border border-slate-200 dark:border-slate-700"
         >
           <ul className="py-1">
             {searchResults.map((item) => (

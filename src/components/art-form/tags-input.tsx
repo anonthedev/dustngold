@@ -20,7 +20,7 @@ export function TagsInput() {
             key={tag}
             className="bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-full flex items-center gap-2"
           >
-            <span>{tag}</span>
+            <span className="text-black">{tag}</span>
             <button
               type="button"
               onClick={() => {
