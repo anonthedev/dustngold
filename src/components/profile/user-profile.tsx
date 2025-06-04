@@ -40,6 +40,8 @@ export function UserProfile({ user }: UserProfileProps) {
         body: JSON.stringify({ username }),
       })
 
+      console.log(await response.json())
+
       if (!response.ok) {
         throw new Error("Failed to update username")
       }

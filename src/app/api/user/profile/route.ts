@@ -48,6 +48,8 @@ export async function PUT(request: NextRequest) {
   try {
     const body = await request.json();
 
+    console.log(body)
+
     // Validate username
     if (
       !body.username ||
@@ -108,10 +110,12 @@ export async function PUT(request: NextRequest) {
     // Check if username is already taken
     const { data: existingUser, error: checkError } = await supabase
       .from("users")
-      .select("id")
+      .select("*")
       .eq("username", body.username)
       .neq("id", session.user.id)
       .single();
+
+    console.log(existingUser, checkError)
 
     if (checkError && checkError.code !== "PGRST116") {
       // PGRST116 is "no rows returned" which is what we want
@@ -132,6 +136,8 @@ export async function PUT(request: NextRequest) {
       .eq("id", session.user.id)
       .select()
       .single();
+
+    console.log(data, error)
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
