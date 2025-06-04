@@ -1,49 +1,72 @@
-"use client"
+"use client";
 
-import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
-import { getAllArts, upvoteArt } from "@/lib/api"
-import { type ArtType, useArtsStore } from "@/lib/store"
-import { useMutation, useQuery } from "@tanstack/react-query"
-import { useSession } from "next-auth/react"
-import { ArrowBigUp, PlusIcon, Search, TrendingUp, Clock, Filter } from "lucide-react"
-import Link from "next/link"
-import { useEffect, useState, useRef, useCallback } from "react"
-import { toast } from "sonner"
-import { cn } from "@/lib/utils"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Input } from "@/components/ui/input"
-import { ArtCard } from "@/components/art/art-card"
-import { supabaseClient } from "@/lib/supabase"
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { getAllArts, upvoteArt } from "@/lib/api";
+import { type ArtType, useArtsStore } from "@/lib/store";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { useSession } from "next-auth/react";
+import {
+  ArrowBigUp,
+  PlusIcon,
+  Search,
+  TrendingUp,
+  Clock,
+  Filter,
+} from "lucide-react";
+import Link from "next/link";
+import { useEffect, useState, useRef, useCallback } from "react";
+import { toast } from "sonner";
+import { cn } from "@/lib/utils";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { ArtCard } from "@/components/art/art-card";
+import { supabaseClient } from "@/lib/supabase";
+import { SearchInput } from "@/components/art/search-input";
 
-type SortOption = "newest" | "votes-high" | "votes-low"
+type SortOption = "newest" | "votes-high" | "votes-low";
 
 export default function ArtsPage() {
-  const { data: session } = useSession()
-  const { arts, setArts, selectedType, setSelectedType, upvoteArt: upvoteArtInStore } = useArtsStore()
-  const [sortOption, setSortOption] = useState<SortOption>("newest")
-  const [searchQuery, setSearchQuery] = useState("")
-  const [isSticky, setIsSticky] = useState(false)
-  const [userUpvotes, setUserUpvotes] = useState<string[]>([])
+  const { data: session } = useSession();
+  const {
+    arts,
+    setArts,
+    selectedType,
+    setSelectedType,
+    upvoteArt: upvoteArtInStore,
+  } = useArtsStore();
+  const [sortOption, setSortOption] = useState<SortOption>("newest");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isSticky, setIsSticky] = useState(false);
+  const [userUpvotes, setUserUpvotes] = useState<string[]>([]);
 
   // Refs for intersection observer
-  const headerRef = useRef<HTMLDivElement>(null)
-  const controlsRef = useRef<HTMLDivElement>(null)
+  const headerRef = useRef<HTMLDivElement>(null);
+  const controlsRef = useRef<HTMLDivElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   const typeStyles: { [key: string]: string } = {
-    music: "bg-gradient-to-r from-pink-500/20 to-purple-500/20 text-pink-300 border-pink-500/50",
+    music:
+      "bg-gradient-to-r from-pink-500/20 to-purple-500/20 text-pink-300 border-pink-500/50",
     book: "bg-gradient-to-r from-sky-500/20 to-blue-500/20 text-sky-300 border-sky-500/50",
-    movie: "bg-gradient-to-r from-amber-500/20 to-orange-500/20 text-amber-300 border-amber-500/50",
+    movie:
+      "bg-gradient-to-r from-amber-500/20 to-orange-500/20 text-amber-300 border-amber-500/50",
     misc: "bg-gradient-to-r from-teal-500/20 to-emerald-500/20 text-teal-300 border-teal-500/50",
-    default: "bg-gradient-to-r from-slate-600/20 to-slate-500/20 text-slate-300 border-slate-500/50",
-  }
+    default:
+      "bg-gradient-to-r from-slate-600/20 to-slate-500/20 text-slate-300 border-slate-500/50",
+  };
 
   const typeIcons: { [key: string]: string } = {
     music: "🎵",
     book: "📚",
     movie: "🎬",
     misc: "🎨",
-  }
+  };
 
   // Intersection Observer for sticky behavior
   useEffect(() => {
@@ -51,113 +74,119 @@ export default function ArtsPage() {
       (entries) => {
         entries.forEach((entry) => {
           if (entry.target === headerRef.current) {
-            setIsSticky(!entry.isIntersecting)
+            setIsSticky(!entry.isIntersecting);
           }
-        })
+        });
       },
       {
         threshold: 0,
         rootMargin: "0px 0px -100px 0px",
-      },
-    )
+      }
+    );
 
     if (headerRef.current) {
-      observer.observe(headerRef.current)
+      observer.observe(headerRef.current);
     }
 
-    return () => observer.disconnect()
-  }, [])
+    return () => observer.disconnect();
+  }, []);
 
   // Fetch all arts
   const { data, isLoading, error } = useQuery({
     queryKey: ["arts"],
     queryFn: getAllArts,
-  })
+  });
 
   // Fetch user's upvotes when they're logged in
   useEffect(() => {
     async function fetchUserUpvotes() {
-      if (!session?.supabaseAccessToken) return
-      
-      const supabase = supabaseClient(session.supabaseAccessToken)
+      if (!session?.supabaseAccessToken) return;
+
+      const supabase = supabaseClient(session.supabaseAccessToken);
       const { data } = await supabase
         .from("art_votes")
         .select("art_id")
-        .eq("user_id", session.user.id)
-      
+        .eq("user_id", session.user.id);
+
       if (data) {
-        setUserUpvotes(data.map(vote => vote.art_id))
+        setUserUpvotes(data.map((vote) => vote.art_id));
       }
     }
-    
-    fetchUserUpvotes()
-  }, [session])
+
+    fetchUserUpvotes();
+  }, [session]);
+
+  // SearchInput component handles debouncing internally
 
   // Set arts in the store when data is fetched
   useEffect(() => {
     if (data) {
-      setArts(data)
+      setArts(data);
     }
-  }, [data, setArts])
+  }, [data, setArts]);
 
   // Upvote mutation
   const upvoteMutation = useMutation({
     mutationFn: upvoteArt,
     onSuccess: (data) => {
       // Find the art in the store and update it with the new vote count
-      const artToUpdate = arts.find(art => art.uuid === data.uuid)
+      const artToUpdate = arts.find((art) => art.uuid === data.uuid);
       if (artToUpdate) {
         const updatedArt = {
           ...artToUpdate,
-          votes: data.votes
-        }
-        upvoteArtInStore(updatedArt)
+          votes: data.votes,
+        };
+        upvoteArtInStore(updatedArt);
       }
-      
+
       // Update the user's upvotes state
       if (data.upvoted) {
-        setUserUpvotes(prev => [...prev, data.uuid])
+        setUserUpvotes((prev) => [...prev, data.uuid]);
       } else {
-        setUserUpvotes(prev => prev.filter(id => id !== data.uuid))
+        setUserUpvotes((prev) => prev.filter((id) => id !== data.uuid));
       }
-      
-      toast.success(data.upvoted ? "Upvoted successfully!" : "Upvote removed")
+
+      toast.success(data.upvoted ? "Upvoted successfully!" : "Upvote removed");
     },
     onError: (error) => {
-      toast.error(error instanceof Error ? error.message : "Failed to update vote")
+      toast.error(
+        error instanceof Error ? error.message : "Failed to update vote"
+      );
     },
-  })
+  });
 
   // Filter and search arts
-  let filteredArts = arts
+  let filteredArts = arts;
 
   // Filter by type
   if (selectedType !== "all") {
-    filteredArts = filteredArts.filter((art) => art.type === selectedType)
+    filteredArts = filteredArts.filter((art) => art.type === selectedType);
   }
 
   // Filter by search query
   if (searchQuery.trim()) {
-    const query = searchQuery.toLowerCase()
+    const query = searchQuery.toLowerCase();
     filteredArts = filteredArts.filter(
       (art) =>
         art.name.toLowerCase().includes(query) ||
         art.description?.toLowerCase().includes(query) ||
         art.artist?.some((artist) => artist.toLowerCase().includes(query)) ||
-        art.tags?.some((tag) => tag.toLowerCase().includes(query)),
-    )
+        art.tags?.some((tag) => tag.toLowerCase().includes(query))
+    );
   }
 
   // Sort the filtered arts
   filteredArts = [...filteredArts].sort((a, b) => {
     if (sortOption === "votes-high") {
-      return Number(b.votes) - Number(a.votes)
+      return Number(b.votes) - Number(a.votes);
     } else if (sortOption === "votes-low") {
-      return Number(a.votes) - Number(b.votes)
+      return Number(a.votes) - Number(b.votes);
     } else {
-      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      return (
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      );
     }
-  })
+  });
 
   if (isLoading) {
     return (
@@ -181,7 +210,10 @@ export default function ArtsPage() {
           {/* Grid skeleton */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {[...Array(8)].map((_, i) => (
-              <Card key={i} className="overflow-hidden bg-slate-800/30 border-slate-700/50">
+              <Card
+                key={i}
+                className="overflow-hidden bg-slate-800/30 border-slate-700/50"
+              >
                 <div className="aspect-[3/4] bg-slate-800/50" />
                 <div className="p-4 space-y-3">
                   <div className="h-6 bg-slate-800/50 rounded w-3/4" />
@@ -194,7 +226,7 @@ export default function ArtsPage() {
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   if (error) {
@@ -207,20 +239,18 @@ export default function ArtsPage() {
           <Button onClick={() => window.location.reload()}>Try Again</Button>
         </div>
       </div>
-    )
+    );
   }
 
   // Controls component to avoid duplication
   const ControlsSection = ({ className = "" }: { className?: string }) => (
     <div className={cn("space-y-4", className)}>
       {/* Search bar */}
-      <div className="relative max-w-md">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
-        <Input
+      <div className="max-w-md">
+        <SearchInput
           placeholder="Search gems..."
           value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="pl-10 bg-slate-800/40 border-slate-700 focus:border-amber-500/50 focus:ring-amber-500/20"
+          onChange={setSearchQuery}
         />
       </div>
 
@@ -229,7 +259,12 @@ export default function ArtsPage() {
         <div className="flex items-center gap-4 flex-wrap">
           <div className="flex items-center gap-2">
             <Filter className="h-4 w-4 text-slate-400" />
-            <Select value={selectedType} onValueChange={(value) => setSelectedType(value as ArtType | "all")}>
+            <Select
+              value={selectedType}
+              onValueChange={(value) =>
+                setSelectedType(value as ArtType | "all")
+              }
+            >
               <SelectTrigger className="w-[180px] bg-slate-800/40 border-slate-700">
                 <SelectValue placeholder="Select category" />
               </SelectTrigger>
@@ -263,7 +298,10 @@ export default function ArtsPage() {
             </Select>
           </div>
 
-          <Select value={sortOption} onValueChange={(value) => setSortOption(value as SortOption)}>
+          <Select
+            value={sortOption}
+            onValueChange={(value) => setSortOption(value as SortOption)}
+          >
             <SelectTrigger className="w-[140px] bg-slate-800/40 border-slate-700">
               <SelectValue placeholder="Sort by" />
             </SelectTrigger>
@@ -298,7 +336,7 @@ export default function ArtsPage() {
         </Link>
       </div>
     </div>
-  )
+  );
 
   return (
     <div className="container mx-auto py-8 px-4">
@@ -311,18 +349,22 @@ export default function ArtsPage() {
           <div className="absolute inset-0 bg-gradient-to-r from-amber-400/20 to-amber-500/20 blur-3xl -z-10" />
         </div>
         <p className="text-lg md:text-xl text-slate-300 max-w-3xl mx-auto leading-relaxed">
-          Discover and share hidden gems and forgotten treasures across music, books, movies, and more. Unearth the
-          extraordinary in the overlooked.
+          Discover and share hidden gems and forgotten treasures across music,
+          books, movies, and more. Unearth the extraordinary in the overlooked.
         </p>
 
         {/* Stats */}
         <div className="flex justify-center gap-8 mt-8 text-sm text-slate-400">
           <div className="text-center">
-            <div className="text-2xl font-bold text-amber-400">{arts.length}</div>
+            <div className="text-2xl font-bold text-amber-400">
+              {arts.length}
+            </div>
             <div>Gems Found</div>
           </div>
           <div className="text-center">
-            <div className="text-2xl font-bold text-amber-400">{arts.reduce((sum, art) => sum + art.votes, 0)}</div>
+            <div className="text-2xl font-bold text-amber-400">
+              {arts.reduce((sum, art) => sum + art.votes, 0)}
+            </div>
             <div>Total Votes</div>
           </div>
         </div>
@@ -383,5 +425,5 @@ export default function ArtsPage() {
         )}
       </div>
     </div>
-  )
+  );
 }
