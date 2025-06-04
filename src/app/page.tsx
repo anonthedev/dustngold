@@ -47,26 +47,6 @@ export default function ArtsPage() {
 
   // Refs for intersection observer
   const headerRef = useRef<HTMLDivElement>(null);
-  const controlsRef = useRef<HTMLDivElement>(null);
-  const searchInputRef = useRef<HTMLInputElement>(null);
-
-  const typeStyles: { [key: string]: string } = {
-    music:
-      "bg-gradient-to-r from-pink-500/20 to-purple-500/20 text-pink-300 border-pink-500/50",
-    book: "bg-gradient-to-r from-sky-500/20 to-blue-500/20 text-sky-300 border-sky-500/50",
-    movie:
-      "bg-gradient-to-r from-amber-500/20 to-orange-500/20 text-amber-300 border-amber-500/50",
-    misc: "bg-gradient-to-r from-teal-500/20 to-emerald-500/20 text-teal-300 border-teal-500/50",
-    default:
-      "bg-gradient-to-r from-slate-600/20 to-slate-500/20 text-slate-300 border-slate-500/50",
-  };
-
-  const typeIcons: { [key: string]: string } = {
-    music: "🎵",
-    book: "📚",
-    movie: "🎬",
-    misc: "🎨",
-  };
 
   // Intersection Observer for sticky behavior
   useEffect(() => {
@@ -242,102 +222,6 @@ export default function ArtsPage() {
     );
   }
 
-  // Controls component to avoid duplication
-  const ControlsSection = ({ className = "" }: { className?: string }) => (
-    <div className={cn("space-y-4", className)}>
-      {/* Search bar */}
-      <div className="max-w-md">
-        <SearchInput
-          placeholder="Search gems..."
-          value={searchQuery}
-          onChange={setSearchQuery}
-        />
-      </div>
-
-      {/* Filters */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div className="flex items-center gap-4 flex-wrap">
-          <div className="flex items-center gap-2">
-            <Filter className="h-4 w-4 text-slate-400" />
-            <Select
-              value={selectedType}
-              onValueChange={(value) =>
-                setSelectedType(value as ArtType | "all")
-              }
-            >
-              <SelectTrigger className="w-[180px] bg-slate-800/40 border-slate-700">
-                <SelectValue placeholder="Select category" />
-              </SelectTrigger>
-              <SelectContent className="bg-slate-800/95 backdrop-blur-xl border-slate-700 text-white">
-                <SelectItem value="all">
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg">✨</span> All Treasures
-                  </div>
-                </SelectItem>
-                <SelectItem value="music">
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg">🎵</span> Lost Music
-                  </div>
-                </SelectItem>
-                <SelectItem value="book">
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg">📚</span> Hidden Books
-                  </div>
-                </SelectItem>
-                <SelectItem value="movie">
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg">🎬</span> Forgotten Films
-                  </div>
-                </SelectItem>
-                <SelectItem value="misc">
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg">🎨</span> Rare Finds
-                  </div>
-                </SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <Select
-            value={sortOption}
-            onValueChange={(value) => setSortOption(value as SortOption)}
-          >
-            <SelectTrigger className="w-[140px] bg-slate-800/40 border-slate-700">
-              <SelectValue placeholder="Sort by" />
-            </SelectTrigger>
-            <SelectContent className="bg-slate-800/95 backdrop-blur-xl border-slate-700 text-white">
-              <SelectItem value="newest">
-                <div className="flex items-center gap-2">
-                  <Clock className="h-4 w-4" />
-                  Newest
-                </div>
-              </SelectItem>
-              <SelectItem value="votes-high">
-                <div className="flex items-center gap-2">
-                  <TrendingUp className="h-4 w-4" />
-                  Most Votes
-                </div>
-              </SelectItem>
-              <SelectItem value="votes-low">
-                <div className="flex items-center gap-2">
-                  <ArrowBigUp className="h-4 w-4" />
-                  Least Votes
-                </div>
-              </SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        <Link href="/arts/add">
-          <Button className="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-black font-medium shadow-lg hover:shadow-xl transition-all duration-200">
-            <PlusIcon className="h-4 w-4 mr-2" />
-            Share a Hidden Gem
-          </Button>
-        </Link>
-      </div>
-    </div>
-  );
-
   return (
     <div className="container mx-auto py-8 px-4">
       {/* Header section with ref for intersection observer */}
@@ -370,18 +254,99 @@ export default function ArtsPage() {
         </div>
       </div>
 
-      {/* Sticky controls that appear when scrolled past header */}
-      {isSticky && (
-        <div className="fixed top-16 left-0 right-0 z-40 bg-slate-900/95 backdrop-blur-xl border-b border-slate-700/50 shadow-xl transition-all duration-300 ease-in-out">
-          <div className="container mx-auto px-4 py-4">
-            <ControlsSection />
+      <div className={cn("mb-8", isSticky && "invisible")}>
+        <div className="space-y-4">
+          {/* Search bar */}
+          <div className="max-w-md">
+            <SearchInput
+              placeholder="Search gems..."
+              value={searchQuery}
+              onChange={setSearchQuery}
+            />
+          </div>
+
+          {/* Filters */}
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div className="flex items-center gap-4 flex-wrap">
+              <div className="flex items-center gap-2">
+                <Filter className="h-4 w-4 text-slate-400" />
+                <Select
+                  value={selectedType}
+                  onValueChange={(value) =>
+                    setSelectedType(value as ArtType | "all")
+                  }
+                >
+                  <SelectTrigger className="w-[180px] bg-slate-800/40 border-slate-700">
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-800/95 backdrop-blur-xl border-slate-700 text-white">
+                    <SelectItem value="all">
+                      <div className="flex items-center gap-2">
+                        <span className="text-lg">✨</span> All Treasures
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="music">
+                      <div className="flex items-center gap-2">
+                        <span className="text-lg">🎵</span> Lost Music
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="book">
+                      <div className="flex items-center gap-2">
+                        <span className="text-lg">📚</span> Hidden Books
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="movie">
+                      <div className="flex items-center gap-2">
+                        <span className="text-lg">🎬</span> Forgotten Films
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="misc">
+                      <div className="flex items-center gap-2">
+                        <span className="text-lg">🎨</span> Rare Finds
+                      </div>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <Select
+                value={sortOption}
+                onValueChange={(value) => setSortOption(value as SortOption)}
+              >
+                <SelectTrigger className="w-[140px] bg-slate-800/40 border-slate-700">
+                  <SelectValue placeholder="Sort by" />
+                </SelectTrigger>
+                <SelectContent className="bg-slate-800/95 backdrop-blur-xl border-slate-700 text-white">
+                  <SelectItem value="newest">
+                    <div className="flex items-center gap-2">
+                      <Clock className="h-4 w-4" />
+                      Newest
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="votes-high">
+                    <div className="flex items-center gap-2">
+                      <TrendingUp className="h-4 w-4" />
+                      Most Votes
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="votes-low">
+                    <div className="flex items-center gap-2">
+                      <ArrowBigUp className="h-4 w-4" />
+                      Least Votes
+                    </div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <Link href="/arts/add">
+              <Button className="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-black font-medium shadow-lg hover:shadow-xl transition-all duration-200">
+                <PlusIcon className="h-4 w-4 mr-2" />
+                Share a Hidden Gem
+              </Button>
+            </Link>
           </div>
         </div>
-      )}
-
-      {/* Original controls section */}
-      <div ref={controlsRef} className={cn("mb-8", isSticky && "invisible")}>
-        <ControlsSection />
       </div>
 
       {/* Content section with padding when sticky is active */}
