@@ -14,7 +14,6 @@ export interface Art {
   submitted_by: string | null;
   tags: string[] | null;
   created_at: string;
-  upvoted_by: string[] | null;
   artist?: string[] | null;
   published_on?: Date | null;
 }

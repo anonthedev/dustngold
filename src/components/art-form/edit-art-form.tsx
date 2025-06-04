@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
@@ -10,26 +12,22 @@ import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { artSchema } from '@/lib/schemas';
 import { ArtTypeSelector } from './art-type-selector';
-import { SearchInput } from './search-input';
-import { UrlInput } from './url-input';
 import { TagsInput } from './tags-input';
 import { ArtistsInput } from './artists-input';
 import { PublishedDate } from './published-date';
-import { useAddArtMutation } from '@/lib/hooks/use-art-queries';
 import { Art } from '@/lib/store';
+import { Loader2 } from 'lucide-react';
 
-interface ArtFormProps {
-  initialData?: Art;
-  isEditing?: boolean;
+interface EditArtFormProps {
+  art: Art;
 }
 
-export function ArtForm({ initialData, isEditing = false }: ArtFormProps) {
-  // Initialize form with default values or initial data if editing
+export function EditArtForm({ art }: EditArtFormProps) {
   const { data: session } = useSession();
   const [submitting, setSubmitting] = useState(false);
   const router = useRouter();
   
-  // Initialize form with default values or initial data if editing
+  // Initialize form with art data
   const {
     register,
     handleSubmit,
@@ -39,78 +37,68 @@ export function ArtForm({ initialData, isEditing = false }: ArtFormProps) {
   } = useForm({
     resolver: zodResolver(artSchema),
     defaultValues: {
-      type: initialData?.type || 'music',
-      name: initialData?.name || '',
-      url: initialData?.url || '',
-      description: initialData?.description || undefined,
-      image_url: initialData?.image_url || '',
-      tags: initialData?.tags || [] as string[],
-      artist: initialData?.artist || [] as string[],
-      published_on: initialData?.published_on || null,
+      type: art.type || 'music',
+      name: art.name || '',
+      url: art.url || '',
+      description: art.description || undefined,
+      image_url: art.image_url || null,
+      tags: art.tags || [] as string[],
+      artist: art.artist || [] as string[],
+      published_on: art.published_on || null,
     },
   });
   
   // Get the current art type to conditionally render the components
   const currentArtType = watch('type');
   
-  // Use the add art mutation
-  const addArtMutation = useAddArtMutation(session?.user?.id || '');
-  
-  // Initialize form state from initialData if provided
+  // Initialize form state from art data
   useEffect(() => {
-    if (initialData && isEditing) {
-      // Set tags in the store
-      if (initialData.tags && initialData.tags.length > 0) {
-        const tagsSet = new Set(initialData.tags);
-        useArtFormStore.getState().setTags(tagsSet);
-      }
-      
-      // Set artists in the store
-      if (initialData.artist && initialData.artist.length > 0) {
-        const artistsSet = new Set(initialData.artist);
-        useArtFormStore.getState().setArtists(artistsSet);
-      }
-      
-      // Set published date if available
-      if (initialData.published_on) {
-        const dateStr = new Date(initialData.published_on).toISOString().split('T')[0];
-        useArtFormStore.getState().setPublishedDateStr(dateStr);
-      }
+    // Set tags in the store
+    if (art.tags && art.tags.length > 0) {
+      const tagsSet = new Set(art.tags);
+      useArtFormStore.getState().setTags(tagsSet);
     }
-  }, [initialData, isEditing]);
+    
+    // Set artists in the store
+    if (art.artist && art.artist.length > 0) {
+      const artistsSet = new Set(art.artist);
+      useArtFormStore.getState().setArtists(artistsSet);
+    }
+    
+    // Set published date if available
+    if (art.published_on) {
+      const dateStr = new Date(art.published_on).toISOString().split('T')[0];
+      useArtFormStore.getState().setPublishedDateStr(dateStr);
+    }
+  }, [art]);
   
   const onSubmit = async (data: any) => {
     if (!session || !session.user?.id) {
-      toast.error('You must be logged in to add art');
+      toast.error('You must be logged in to update art');
       return;
     }
     
     setSubmitting(true);
     
     try {
-      if (isEditing && initialData) {
-        // Update existing art
-        const response = await fetch(`/api/arts/${initialData.uuid}`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(data),
-        });
-        
-        if (!response.ok) {
-          throw new Error('Failed to update art');
-        }
-        
-        toast.success('Art updated successfully');
-        router.push('/profile');
-      } else {
-        // Create new art
-        addArtMutation.mutate(data);
+      // Update existing art
+      const response = await fetch(`/api/arts/${art.uuid}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to update art');
       }
+      
+      toast.success('Art updated successfully');
+      router.push('/profile');
     } catch (error) {
       toast.error('Error', {
-        description: error instanceof Error ? error.message : 'Failed to save art',
+        description: error instanceof Error ? error.message : 'Failed to update art',
       });
     } finally {
       setSubmitting(false);
@@ -118,11 +106,11 @@ export function ArtForm({ initialData, isEditing = false }: ArtFormProps) {
   };
   
   return (
-    <Card className="p-6">
+    <Card className="text-white p-6 bg-slate-800/60 backdrop-blur-md border border-slate-700/80 rounded-lg">
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <div>
-          <label className="block text-sm font-medium mb-2">Type</label>
-          <ArtTypeSelector setValue={setValue} />
+          {/* <label className="block text-sm font-medium mb-2">Type</label> */}
+          {/* <ArtTypeSelector setValue={setValue} /> */}
           {errors.type && (
             <p className="text-red-500 text-sm mt-1">{errors.type.message}</p>
           )}
@@ -132,15 +120,11 @@ export function ArtForm({ initialData, isEditing = false }: ArtFormProps) {
           <label htmlFor="name" className="block text-sm font-medium mb-2">
             Name
           </label>
-          {currentArtType === 'movie' || currentArtType === 'book' || currentArtType === 'music' ? (
-            <SearchInput type={currentArtType} register={register} setValue={setValue} />
-          ) : (
-            <Input
-              id="name"
-              placeholder="Enter name"
-              {...register('name')}
-            />
-          )}
+          <Input
+            id="name"
+            placeholder="Enter name"
+            {...register('name')}
+          />
           {errors.name && (
             <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>
           )}
@@ -150,7 +134,11 @@ export function ArtForm({ initialData, isEditing = false }: ArtFormProps) {
           <label htmlFor="url" className="block text-sm font-medium mb-2">
             URL
           </label>
-          <UrlInput register={register} setValue={setValue} watch={watch} />
+          <Input
+            id="url"
+            placeholder="Enter URL"
+            {...register('url')}
+          />
           {errors.url && (
             <p className="text-red-500 text-sm mt-1">{errors.url.message}</p>
           )}
@@ -184,16 +172,16 @@ export function ArtForm({ initialData, isEditing = false }: ArtFormProps) {
           )}
         </div>
 
-        <div>
-          <label className="block text-sm font-medium mb-2">
+        <div className='text-black'>
+          <label className="block text-sm font-medium mb-2 text-white">
             Tags
           </label>
           <TagsInput />
         </div>
 
         {/* Artist/Author field for all art types */}
-        <div>
-          <label className="block text-sm font-medium mb-2">
+        <div className='text-black'>
+          <label className="block text-sm font-medium mb-2 text-white">
             {currentArtType === 'movie' ? 'Director/Artist' : 'Artist/Author'}
           </label>
           <ArtistsInput artType={currentArtType} setValue={setValue} />
@@ -210,10 +198,17 @@ export function ArtForm({ initialData, isEditing = false }: ArtFormProps) {
         <div className="pt-4">
           <Button
             type="submit"
-            disabled={addArtMutation.isPending || !session || submitting}
-            className="w-full cursor-pointer"
+            disabled={!session || submitting}
+            className="bg-amber-500 hover:bg-amber-600 text-black font-medium"
           >
-            {addArtMutation.isPending || submitting ? (isEditing ? 'Updating...' : 'Adding...') : (isEditing ? 'Update Art' : 'Add Art')}
+            {submitting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Updating...
+              </>
+            ) : (
+              'Update Art'
+            )}
           </Button>
         </div>
       </form>

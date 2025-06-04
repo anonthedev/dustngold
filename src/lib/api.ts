@@ -51,7 +51,7 @@ export async function addArt(art: ArtFormValues, userId: string): Promise<Art> {
 }
 
 // Function to toggle upvote on an art
-export async function upvoteArt(uuid: string): Promise<Art> {
+export async function upvoteArt(uuid: string): Promise<{ uuid: string; votes: number; upvoted: boolean }> {
   const response = await fetch(`/api/arts/${uuid}/upvote`, {
     method: 'POST',
     headers: {

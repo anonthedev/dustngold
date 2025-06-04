@@ -17,10 +17,10 @@ export async function POST(request: NextRequest,{ params }: { params: Promise<{ 
     // Create Supabase client with the user's access token
     const supabase = supabaseClient(session.supabaseAccessToken);
 
-    // First get the current art
+    // First check if the art exists
     const { data: art, error: fetchError } = await supabase
       .from("arts")
-      .select("*")
+      .select("uuid")
       .eq("uuid", uuid)
       .single();
 
@@ -35,41 +35,65 @@ export async function POST(request: NextRequest,{ params }: { params: Promise<{ 
     // Get current user's ID
     const userId = session.user.id;
     
-    // Initialize upvoted_by as an array if it doesn't exist
-    const upvotedBy = art.upvoted_by || [];
+    // Check if user has already upvoted using the new art_votes table
+    const { data: existingVote, error: voteCheckError } = await supabase
+      .from("art_votes")
+      .select("id")
+      .eq("art_id", uuid)
+      .eq("user_id", userId)
+      .maybeSingle();
+      
+    if (voteCheckError) {
+      return NextResponse.json({ error: voteCheckError.message }, { status: 500 });
+    }
     
-    // Check if user has already upvoted
-    const hasUpvoted = upvotedBy.includes(userId);
+    let result;
     
-    let updatedUpvotedBy;
-    let updatedVotes;
-    
-    if (hasUpvoted) {
-      // User already upvoted, remove upvote
-      updatedUpvotedBy = upvotedBy.filter((id: string) => id !== userId);
-      updatedVotes = art.votes - 1;
+    if (existingVote) {
+      // User already upvoted, remove upvote by deleting the row
+      const { error: deleteError } = await supabase
+        .from("art_votes")
+        .delete()
+        .eq("art_id", uuid)
+        .eq("user_id", userId);
+
+      if (deleteError) {
+        return NextResponse.json({ error: deleteError.message }, { status: 500 });
+      }
+      
+      result = { upvoted: false };
     } else {
-      // User has not upvoted, add upvote
-      updatedUpvotedBy = [...upvotedBy, userId];
-      updatedVotes = art.votes + 1;
+      // User has not upvoted, add upvote by inserting a new row
+      const { error: insertError } = await supabase
+        .from("art_votes")
+        .insert({ 
+          art_id: uuid,
+          user_id: userId
+        });
+
+      if (insertError) {
+        return NextResponse.json({ error: insertError.message }, { status: 500 });
+      }
+      
+      result = { upvoted: true };
     }
-
-    // Update the votes and upvoted_by array
-    const { data, error } = await supabase
-      .from("arts")
-      .update({ 
-        votes: updatedVotes,
-        upvoted_by: updatedUpvotedBy 
-      })
-      .eq("uuid", uuid)
-      .select()
-      .single();
-
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+    
+    // Count total votes for this art piece
+    const { count, error: countError } = await supabase
+      .from("art_votes")
+      .select("id", { count: "exact" })
+      .eq("art_id", uuid);
+      
+    if (countError) {
+      return NextResponse.json({ error: countError.message }, { status: 500 });
     }
-
-    return NextResponse.json(data);
+    
+    // Return the updated data
+    return NextResponse.json({ 
+      ...result,
+      uuid,
+      votes: count
+    });
   } catch (e) {
     console.error(e);
     return NextResponse.json(

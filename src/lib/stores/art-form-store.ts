@@ -1,5 +1,4 @@
 import { create } from "zustand";
-import { Art, ArtType } from "@/lib/store";
 
 export interface ArtFormState {
   // Form data
