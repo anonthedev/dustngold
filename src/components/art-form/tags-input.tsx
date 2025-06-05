@@ -5,7 +5,7 @@ export function TagsInput() {
   const { tags, currentTag, setTags, setCurrentTag } = useArtFormStore();
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-2 text-white">
       <MultiInput
         inputs={tags}
         setInputs={setTags}

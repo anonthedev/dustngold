@@ -43,9 +43,10 @@ export function EditArtForm({ art }: EditArtFormProps) {
       image_url: art.image_url || null,
       tags: art.tags || ([] as string[]),
       artist: art.artist || ([] as string[]),
-      published_on: art.published_on || null,
+      published_on: art.published_on ? (typeof art.published_on === 'string' ? new Date(art.published_on) : art.published_on) : null,
     },
   });
+  console.log("Form validation errors:", errors); 
 
   // Get the current art type to conditionally render the components
   const currentArtType = watch("type");
@@ -77,10 +78,11 @@ export function EditArtForm({ art }: EditArtFormProps) {
       return;
     }
 
+    console.log("here")
+
     setSubmitting(true);
 
     try {
-      // Update existing art
       const response = await fetch(`/api/arts/${art.uuid}`, {
         method: "PUT",
         headers: {
@@ -107,10 +109,12 @@ export function EditArtForm({ art }: EditArtFormProps) {
 
   return (
     <Card className="text-white p-6 bg-slate-800/60 backdrop-blur-md border border-slate-700/80 rounded-lg">
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6" onKeyDown={(e) => {
+          if (e.key === 'Enter' && (e.target as HTMLElement).tagName.toLowerCase() === 'input') {
+            e.preventDefault();
+          }
+        }}>
         <div>
-          {/* <label className="block text-sm font-medium mb-2">Type</label> */}
-          {/* <ArtTypeSelector setValue={setValue} /> */}
           {errors.type && (
             <p className="text-red-500 text-sm mt-1">{errors.type.message}</p>
           )}

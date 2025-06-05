@@ -37,7 +37,7 @@ export function ArtCard({
   const { data: session } = useSession()
   const router = useRouter()
   const [showUpvotersDialog, setShowUpvotersDialog] = useState(false)
-  console.log(art.upvoters)
+  // console.log(art.upvoters)
 
   const typeStyles: { [key: string]: string } = {
     music: "bg-gradient-to-r from-pink-500/20 to-purple-500/20 text-pink-300 border-pink-500/50",

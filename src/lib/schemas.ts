@@ -13,10 +13,8 @@ export const artSchema = z.object({
   url: z.string().url({
     message: "Please enter a valid URL",
   }).nullable().optional(),
-  description: z.string().optional(),
-  image_url: z.string().url({
-    message: "Please enter a valid URL for cover art",
-  }).nullable().optional(),
+  description: z.string().nullable().optional(),
+  image_url: z.string().url().nullable().optional(),
   tags: z.array(z.string()).nullable().optional(),
   artist: z.array(z.string()).nullable().optional(),
   published_on: z.date().nullable().optional(),
