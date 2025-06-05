@@ -71,20 +71,48 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(username ? { user: userInfo, arts: [] } : []);
     }
     
-    // Fetch vote counts for all arts
-    const { data: votes, error: votesError } = await supabase
-      .from('art_votes')
-      .select('art_id')
-      .in('art_id', arts.map(art => art.uuid));
+    // Fetch votes with user information for all arts
+    const { data:votes, error:votesError } = await supabase
+    .from('art_votes')
+    .select('art_id, user_id, public_users:user_id(id, name, username, image)')
+    .in('art_id', arts.map(art => art.uuid));
+  
       
+    console.log(votes)
+
     if (votesError) {
       return NextResponse.json({ error: votesError.message }, { status: 500 });
     }
     
-    // Count the votes for each art piece
+    // Count the votes for each art piece and collect upvoter information
     const voteCounts: Record<string, number> = {};
+    const upvoters: Record<string, Array<{id: string, name: string, username: string, image: string | null}>> = {};
+    
     votes?.forEach(vote => {
       voteCounts[vote.art_id] = (voteCounts[vote.art_id] || 0) + 1;
+      
+      // Initialize upvoters array for this art if it doesn't exist
+      if (!upvoters[vote.art_id]) {
+        upvoters[vote.art_id] = [];
+      }
+      
+      // Add upvoter info if available
+      if (vote.public_users) {
+        // Type assertion for the nested join result
+        const userData = vote.public_users as unknown as {
+          id: string;
+          name: string;
+          username: string;
+          image: string | null;
+        };
+        
+        upvoters[vote.art_id].push({
+          id: userData.id,
+          name: userData.name,
+          username: userData.username,
+          image: userData.image
+        });
+      }
     });
     
     // For logged-in users, check which arts they've upvoted
@@ -100,10 +128,11 @@ export async function GET(request: NextRequest) {
       }
     }
     
-    // Update arts with vote counts
+    // Update arts with vote counts and upvoter information
     const artsWithVotes = arts.map(art => ({
       ...art,
-      votes: voteCounts[art.uuid] || 0
+      votes: voteCounts[art.uuid] || 0,
+      upvoters: upvoters[art.uuid] || []
     }));
     
     // Return format depends on the request type
@@ -142,7 +171,6 @@ export async function POST(request: NextRequest) {
         type: body.type,
         name: body.name,
         url: body.url || null,
-        votes: 0,
         provider_id: body.provider_id || null,
         description: body.description,
         image_url: body.image_url || null,

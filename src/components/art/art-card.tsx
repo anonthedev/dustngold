@@ -1,6 +1,7 @@
 "use client"
 
 import type React from "react"
+import { useState } from "react"
 
 import type { Art } from "@/lib/store"
 import { Card } from "@/components/ui/card"
@@ -9,6 +10,8 @@ import { ArrowBigUp, Edit, Trash2, ExternalLink } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
+import { AvatarGroup } from "@/components/ui/avatar-group"
+import { UpvotersDialog } from "@/components/art/upvoters-dialog"
 
 interface ArtCardProps {
   art: Art
@@ -33,6 +36,8 @@ export function ArtCard({
 }: ArtCardProps) {
   const { data: session } = useSession()
   const router = useRouter()
+  const [showUpvotersDialog, setShowUpvotersDialog] = useState(false)
+  console.log(art.upvoters)
 
   const typeStyles: { [key: string]: string } = {
     music: "bg-gradient-to-r from-pink-500/20 to-purple-500/20 text-pink-300 border-pink-500/50",
@@ -157,6 +162,21 @@ export function ArtCard({
             </div>
           )}
 
+          {/* {art.upvoters && art.upvoters.length > 0 && (
+            <div className="mt-3 pt-3 border-t border-slate-700/50">
+              <div className="flex justify-between items-center">
+                <span className="text-xs text-slate-400">Upvoted by</span>
+                <AvatarGroup 
+                  users={art.upvoters} 
+                  max={3} 
+                  size="sm" 
+                  className="justify-end"
+                  onShowAll={() => setShowUpvotersDialog(true)}
+                />
+              </div>
+            </div>
+          )} */}
+
           {showActions && (
             <div className="flex gap-2 pt-3 border-t border-slate-700/50">
               {onEdit && (
@@ -212,9 +232,35 @@ export function ArtCard({
 
   // If we're not showing actions and the art has a URL, wrap it in a link
   if (!showActions && art.url) {
-    return <div className="h-full">{CardContent}</div>
+    return (
+      <>
+        <div className="h-full">{CardContent}</div>
+        {/* Dialog to show all upvoters */}
+        {art.upvoters && (
+          <UpvotersDialog
+            open={showUpvotersDialog}
+            onOpenChange={setShowUpvotersDialog}
+            upvoters={art.upvoters}
+            artName={art.name}
+          />
+        )}
+      </>
+    )
   }
 
   // Otherwise, just return the card
-  return CardContent
+  return (
+    <>
+      {CardContent}
+      {/* Dialog to show all upvoters */}
+      {art.upvoters && (
+        <UpvotersDialog
+          open={showUpvotersDialog}
+          onOpenChange={setShowUpvotersDialog}
+          upvoters={art.upvoters}
+          artName={art.name}
+        />
+      )}
+    </>
+  )
 }

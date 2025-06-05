@@ -16,6 +16,12 @@ export interface Art {
   created_at: string;
   artist?: string[] | null;
   published_on?: Date | null;
+  upvoters?: Array<{
+    id: string;
+    name: string;
+    username: string;
+    image: string | null;
+  }>;
 }
 
 interface ArtsStore {
