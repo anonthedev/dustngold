@@ -1,12 +1,12 @@
-'use client';
+"use client";
 
-import { useArtsStore, Art } from '@/lib/store';
-import { getArtById } from '@/lib/api';
-import { useParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
-import { Badge } from '@/components/ui/badge';
-import { ExternalLink } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { useArtsStore, Art } from "@/lib/store";
+import { getArtById } from "@/lib/api";
+import { useParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import { Badge } from "@/components/ui/badge";
+import { ExternalLink } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export default function ArtPage() {
   const params = useParams();
@@ -18,8 +18,8 @@ export default function ArtPage() {
 
   useEffect(() => {
     async function fetchArt() {
-      if (typeof uuid !== 'string') {
-        setError('Invalid Art ID.');
+      if (typeof uuid !== "string") {
+        setError("Invalid Art ID.");
         setLoading(false);
         return;
       }
@@ -36,7 +36,7 @@ export default function ArtPage() {
           const fetchedArt = await getArtById(uuid);
           setArt(fetchedArt);
         } catch (e) {
-          setError(e instanceof Error ? e.message : 'Failed to fetch art');
+          setError(e instanceof Error ? e.message : "Failed to fetch art");
           console.error(e);
         }
         setLoading(false);
@@ -74,7 +74,18 @@ export default function ArtPage() {
     );
   }
 
-  const { name, image_url, description, artist, published_on, tags, type, url, provider_id, submitted_by, created_at, votes } = art;
+  const {
+    name,
+    image_url,
+    description,
+    artist,
+    published_on,
+    tags,
+    type,
+    url,
+    created_at,
+    votes,
+  } = art;
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -96,9 +107,11 @@ export default function ArtPage() {
         </div>
         <div className="md:col-span-2 space-y-4">
           <h1 className="text-4xl font-bold tracking-tight">{name}</h1>
-          
+
           {artist && artist.length > 0 && (
-            <p className="text-xl text-muted-foreground">Artist(s): {artist.join(', ')}</p>
+            <p className="text-xl text-muted-foreground">
+              Artist(s): {artist.join(", ")}
+            </p>
           )}
 
           {published_on && (
@@ -108,19 +121,25 @@ export default function ArtPage() {
           )}
 
           <div className="flex items-center space-x-2">
-            <Badge variant="secondary" className="capitalize">{type}</Badge>
-            { votes>0 && <p className="text-lg font-semibold">Votes: {votes}</p>}
+            <Badge variant="secondary" className="capitalize">
+              {type}
+            </Badge>
+            {votes > 0 && (
+              <p className="text-lg font-semibold">Votes: {votes}</p>
+            )}
           </div>
 
           {description && (
             <div>
               <h2 className="text-2xl font-semibold mt-6 mb-2">Description</h2>
-              <p className="text-lg text-muted-foreground whitespace-pre-wrap">{description}</p>
+              <p className="text-lg text-muted-foreground whitespace-pre-wrap">
+                {description}
+              </p>
             </div>
           )}
 
           {url && (
-            <Button 
+            <Button
               onClick={() => window.open(url, "_blank")}
               variant={"primary"}
             >
@@ -133,13 +152,17 @@ export default function ArtPage() {
               <h3 className="text-xl font-semibold mb-2">Tags</h3>
               <div className="flex flex-wrap gap-2">
                 {tags.map((tag) => (
-                  <Badge key={tag} variant="outline">{tag}</Badge>
+                  <Badge key={tag} variant="outline">
+                    {tag}
+                  </Badge>
                 ))}
               </div>
             </div>
           )}
-          
-          <p className="text-sm text-muted-foreground">Created: {new Date(created_at).toLocaleString()}</p>
+
+          <p className="text-sm text-muted-foreground">
+            Created: {new Date(created_at).toLocaleString()}
+          </p>
         </div>
       </div>
     </div>

@@ -55,22 +55,18 @@ export function ArtCard({
     misc: "🎨",
   }
 
-  // Handle click on the card while preventing navigation when clicking on action buttons
   const handleCardClick = (e: React.MouseEvent) => {
-    // If we clicked on a button or its children, don't navigate
     if ((e.target as HTMLElement).closest("button")) {
       e.preventDefault()
       return
     }
 
-    // If the card has a URL and we're not in edit mode, navigate to it
     if (art.url && !showActions) {
-      window.open(art.url, "_blank")
+      window.open(`art/${art.uuid}`, "_blank")
     }
   }
 
   const CardContent = (
-    <Link href={`/art/${art.uuid}`} className="block hover:shadow-xl transition-shadow duration-200 rounded-lg">
     <Card
       className={cn(
         "pt-0 h-full overflow-hidden flex flex-col bg-slate-800/40 backdrop-blur-md border border-slate-700/60 rounded-xl hover:shadow-2xl transition-all duration-300 group",
@@ -78,7 +74,7 @@ export function ArtCard({
         showActions && "hover:border-slate-600/80",
         className,
       )}
-      // onClick={handleCardClick}
+      onClick={handleCardClick}
     >
       {art.image_url ? (
         <div className="relative pt-0 aspect-[3/4] overflow-hidden">
@@ -230,7 +226,6 @@ export function ArtCard({
         </div>
       </div>
     </Card>
-    </Link>
   )
 
   // If we're not showing actions and the art has a URL, wrap it in a link
