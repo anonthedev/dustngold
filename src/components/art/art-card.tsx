@@ -10,6 +10,7 @@ import { ArrowBigUp, Edit, Trash2, ExternalLink } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
+import Link from 'next/link';
 import { AvatarGroup } from "@/components/ui/avatar-group"
 import { UpvotersDialog } from "@/components/art/upvoters-dialog"
 
@@ -69,6 +70,7 @@ export function ArtCard({
   }
 
   const CardContent = (
+    <Link href={`/art/${art.uuid}`} className="block hover:shadow-xl transition-shadow duration-200 rounded-lg">
     <Card
       className={cn(
         "pt-0 h-full overflow-hidden flex flex-col bg-slate-800/40 backdrop-blur-md border border-slate-700/60 rounded-xl hover:shadow-2xl transition-all duration-300 group",
@@ -76,7 +78,7 @@ export function ArtCard({
         showActions && "hover:border-slate-600/80",
         className,
       )}
-      onClick={handleCardClick}
+      // onClick={handleCardClick}
     >
       {art.image_url ? (
         <div className="relative pt-0 aspect-[3/4] overflow-hidden">
@@ -115,7 +117,7 @@ export function ArtCard({
             variant="outline"
             size="sm"
             className={cn(
-              "flex items-center gap-1.5 h-9 px-3 transition-all duration-200 bg-slate-700/50 border-slate-600 hover:bg-slate-600/70 shrink-0",
+              "cursor-pointer flex items-center gap-1.5 h-9 px-3 transition-all duration-200 bg-slate-700/50 border-slate-600 hover:bg-slate-600/70 shrink-0",
               upvotedByUser &&
                 "border-amber-500 text-amber-400 hover:text-amber-300 hover:border-amber-400 bg-amber-500/10 shadow-lg shadow-amber-500/20",
             )}
@@ -228,6 +230,7 @@ export function ArtCard({
         </div>
       </div>
     </Card>
+    </Link>
   )
 
   // If we're not showing actions and the art has a URL, wrap it in a link

@@ -115,7 +115,7 @@ export function UserArts({ userId }: UserArtsProps) {
             className="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-black font-medium shadow-lg hover:shadow-xl transition-all duration-200"
           >
             <Plus className="h-4 w-4 mr-2" />
-            Add New Gem
+            Add New Art
           </Button>
         </div>
 
@@ -127,14 +127,14 @@ export function UserArts({ userId }: UserArtsProps) {
             </div>
             <h3 className="text-2xl font-semibold text-white mb-3">Start Your Collection</h3>
             <p className="text-slate-400 mb-8 leading-relaxed">
-              You haven't shared any hidden gems yet. Start building your collection of amazing discoveries!
+              You haven't shared any hidden Arts yet. Start building your collection of amazing discoveries!
             </p>
             <Button
               onClick={() => router.push("/arts/add")}
               className="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-black font-medium shadow-lg hover:shadow-xl transition-all duration-200"
             >
               <Plus className="h-4 w-4 mr-2" />
-              Share Your First Gem
+              Share Your First Art
             </Button>
           </div>
         </div>
@@ -147,14 +147,14 @@ export function UserArts({ userId }: UserArtsProps) {
       <div className="flex justify-between items-center mb-8">
         <div>
           <h2 className="text-2xl font-semibold text-white">Your Collection</h2>
-          <p className="text-slate-400 mt-1">{arts.length} hidden gems discovered</p>
+          <p className="text-slate-400 mt-1">{arts.length} hidden Arts discovered</p>
         </div>
         <Button
           onClick={() => router.push("/arts/add")}
           className="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-black font-medium shadow-lg hover:shadow-xl transition-all duration-200"
         >
           <Plus className="h-4 w-4 mr-2" />
-          Add New Gem
+          Add New Art
         </Button>
       </div>
 
@@ -175,7 +175,7 @@ export function UserArts({ userId }: UserArtsProps) {
           <AlertDialogHeader>
             <AlertDialogTitle className="text-white">Are you sure?</AlertDialogTitle>
             <AlertDialogDescription className="text-slate-400">
-              This action cannot be undone. This will permanently delete your hidden gem from the collection.
+              This action cannot be undone. This will permanently delete your hidden Art from the collection.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

@@ -233,7 +233,7 @@ export default function ArtsPage() {
           <div className="absolute inset-0 bg-gradient-to-r from-amber-400/20 to-amber-500/20 blur-3xl -z-10" />
         </div>
         <p className="text-lg md:text-xl text-slate-300 max-w-3xl mx-auto leading-relaxed">
-          Discover and share hidden gems and forgotten treasures across music,
+          Discover and share hidden Arts and forgotten treasures across music,
           books, movies, and more. Unearth the extraordinary in the overlooked.
         </p>
 
@@ -243,7 +243,7 @@ export default function ArtsPage() {
             <div className="text-2xl font-bold text-amber-400">
               {arts.length}
             </div>
-            <div>Gems Found</div>
+            <div>Arts Found</div>
           </div>
           <div className="text-center">
             <div className="text-2xl font-bold text-amber-400">
@@ -259,7 +259,7 @@ export default function ArtsPage() {
           {/* Search bar */}
           <div className="max-w-md">
             <SearchInput
-              placeholder="Search gems..."
+              placeholder="Search Arts..."
               value={searchQuery}
               onChange={setSearchQuery}
             />
@@ -269,7 +269,6 @@ export default function ArtsPage() {
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div className="flex items-center gap-4 flex-wrap">
               <div className="flex items-center gap-2">
-                <Filter className="h-4 w-4 text-slate-400" />
                 <Select
                   value={selectedType}
                   onValueChange={(value) =>
@@ -342,7 +341,7 @@ export default function ArtsPage() {
             <Link href="/arts/add">
               <Button className="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-black font-medium shadow-lg hover:shadow-xl transition-all duration-200">
                 <PlusIcon className="h-4 w-4 mr-2" />
-                Share a Hidden Gem
+                Share a Hidden Art
               </Button>
             </Link>
           </div>
@@ -360,14 +359,14 @@ export default function ArtsPage() {
               </h3>
               <p className="text-slate-400 mb-8 leading-relaxed">
                 {searchQuery
-                  ? `No gems match "${searchQuery}". Try a different search term.`
+                  ? `No Arts match "${searchQuery}". Try a different search term.`
                   : "Be the first to share something amazing in this category!"}
               </p>
               {!searchQuery && (
                 <Link href="/arts/add" className="inline-block">
                   <Button className="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-black font-medium shadow-lg hover:shadow-xl transition-all duration-200">
                     <PlusIcon className="h-4 w-4 mr-2" />
-                    Share a Hidden Gem
+                    Share a Hidden Art
                   </Button>
                 </Link>
               )}

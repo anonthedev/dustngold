@@ -52,7 +52,7 @@ export function Navbar() {
               size="sm"
             >
               <Plus className="h-4 w-4 mr-1" />
-              Add Gem
+              Add Art
             </Button>
 
             <DropdownMenu>
@@ -90,7 +90,7 @@ export function Navbar() {
                 <DropdownMenuItem asChild className="cursor-pointer sm:hidden">
                   <Link href="/arts/add" className="flex items-center gap-2">
                     <Plus className="h-4 w-4" />
-                    <span>Add Gem</span>
+                    <span>Add Art</span>
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator className="bg-slate-700" />

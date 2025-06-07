@@ -16,8 +16,8 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
-  title: "Dust & Gold - Discover Hidden Gems",
-  description: "Discover and share hidden gems and forgotten treasures across music, books, movies, and more.",
+  title: "Dust & Gold - Discover Hidden Arts",
+  description: "Discover and share hidden Arts and forgotten treasures across music, books, movies, and more.",
 }
 
 export default function RootLayout({

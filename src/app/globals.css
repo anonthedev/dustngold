@@ -109,14 +109,6 @@
     background: rgba(251, 191, 36, 0.5);
   }
 
-  /* Smooth animations */
-  * {
-    transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow,
-      transform, filter, backdrop-filter;
-    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-    transition-duration: 150ms;
-  }
-
   /* Focus styles */
   .focus-visible\:ring-amber-500\/20:focus-visible {
     --tw-ring-color: rgb(245 158 11 / 0.2);
